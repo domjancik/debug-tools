@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Camera Delay Investigator</title>
+    <style>
+        body {
+            color: white;
+            background: black;
+        }
+        #flashContainer {
+            width: 300px;
+            height: 300px;
+            background-color: black;
+        }
+        #timeInfo {
+            font-family: "Courier New", monospace;
+            font-size: 24px;
+        }
+        #visualDelayIndicator {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            z-index: 1;
+        }
+        .tick {
+            width: 1px;
+            height: 10px;
+            margin-right: 9px;
+            background-color: white;
+            z-index: 0;
+            display: inline-block;
+        }
+        span.time {
+            min-width: 100px;
+            display: inline-block;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Delay Investigator</h1>
+
+    <div id="flashContainer"></div>
+
+    <div id="visualDelayIndicator"></div>
+
+    <div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+        <div class="tick"></div>
+    </div>
+
+    <div id="timeInfo">
+        <p>Time since page load: <span class="time" id="sinceLoad">0</span> ms</p>
+        <p>Time since last flash: <span class="time" id="sinceFlash">0</span> ms</p>
+    </div>
+
+    <label for="interval">Flash Interval (ms): </label>
+    <input type="number" id="interval" value="2000">
+    <button onclick="manualTrigger()">Manual Trigger</button>
+    <button onclick="exportLog()">Export Log</button>
+
+    <script>
+        let startTime = Date.now();
+        let lastFlashTime = Date.now();
+        let flashInterval = 2000;
+        let intervalId;
+        const log = [];
+
+        const flashContainer = document.getElementById('flashContainer');
+        const sinceLoad = document.getElementById('sinceLoad');
+        const sinceFlash = document.getElementById('sinceFlash');
+        const intervalInput = document.getElementById('interval');
+
+        const beep = new Audio('beep.wav');
+
+        function updateTime() {
+            let currentTime = Date.now();
+            sinceLoad.textContent = (currentTime - startTime).toFixed(2);
+            const timeSinceFlash = (currentTime - lastFlashTime)
+            sinceFlash.textContent = timeSinceFlash.toFixed(2);
+            const visualDelayIndicator = document.getElementById('visualDelayIndicator');
+            visualDelayIndicator.style.width = (timeSinceFlash / flashInterval * 300) + 'px';
+        }
+
+        function flashAndBeep() {
+            lastFlashTime = Date.now();
+            log.push({type: 'flash', time: lastFlashTime});
+            
+            flashContainer.style.backgroundColor = 'green';
+            setTimeout(() => {
+                flashContainer.style.backgroundColor = 'yellow';
+            }, 50);
+            setTimeout(() => {
+                flashContainer.style.backgroundColor = 'red';
+            }, 100);
+            setTimeout(() => {
+                flashContainer.style.backgroundColor = 'blue';
+            }, 150);
+            setTimeout(() => {
+                flashContainer.style.backgroundColor = 'black';
+            }, 200);
+
+            beep.play();
+            log.push({type: 'beep', time: Date.now()});
+        }
+
+        function manualTrigger() {
+            flashAndBeep();
+        }
+
+        function exportLog() {
+            const blob = new Blob([JSON.stringify(log)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'log.json';
+            a.click();
+        }
+
+        function setFlashInterval() {
+            clearInterval(intervalId);
+            flashInterval = parseInt(intervalInput.value, 10);
+            intervalId = setInterval(flashAndBeep, flashInterval);
+        }
+
+        // Initialize interval
+        setFlashInterval();
+
+        // Update interval when input changes
+        intervalInput.addEventListener('change', setFlashInterval);
+
+        // Update time display
+        setInterval(updateTime, 16);
+    </script>
+</body>
+</html>

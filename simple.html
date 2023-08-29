@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Camera Delay Investigator</title>
+    <style>
+        #flashContainer {
+            width: 300px;
+            height: 300px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Delay Investigator</h1>
+
+    <div id="flashContainer"></div>
+
+    <p>Time since page load: <span id="sinceLoad">0</span> ms</p>
+    <p>Time since last flash: <span id="sinceFlash">0</span> ms</p>
+
+    <script>
+        // Initialize variables
+        let startTime = Date.now();
+        let lastFlashTime = Date.now();
+        let flashInterval = 2000; // 2 seconds
+
+        // Get DOM elements
+        const flashContainer = document.getElementById('flashContainer');
+        const sinceLoad = document.getElementById('sinceLoad');
+        const sinceFlash = document.getElementById('sinceFlash');
+
+        // Load beep sound
+        const beep = new Audio('beep.wav');
+
+        // Update time since page load and time since last flash
+        function updateTime() {
+            let currentTime = Date.now();
+            sinceLoad.textContent = currentTime - startTime;
+            sinceFlash.textContent = currentTime - lastFlashTime;
+        }
+
+        // Flash and beep function
+        function flashAndBeep() {
+            // Update last flash time
+            lastFlashTime = Date.now();
+
+            // Flash
+            flashContainer.style.backgroundColor = 'yellow';
+            setTimeout(() => {
+                flashContainer.style.backgroundColor = 'white';
+            }, 100);
+
+            // Beep
+            beep.play();
+        }
+
+        // Set interval for flash and beep
+        setInterval(flashAndBeep, flashInterval);
+
+        // Update time every 16 ms (approximately 60 frames per second)
+        setInterval(updateTime, 16);
+    </script>
+</body>
+</html>
